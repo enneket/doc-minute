@@ -8,7 +8,6 @@ function NoteModal({ note, onSave, onClose }) {
   const [items, setItems] = useState([]);
   const [newItemContent, setNewItemContent] = useState('');
 
-  // 重置状态当 note 改变时
   useEffect(() => {
     setTitle(note?.title || '');
     setItems([]);
@@ -83,6 +82,7 @@ function NoteModal({ note, onSave, onClose }) {
 
   const handleKeyPress = (e) => {
     if (e.key === 'Enter') {
+      e.preventDefault();
       handleAddItem();
     }
   };
@@ -137,7 +137,7 @@ function NoteModal({ note, onSave, onClose }) {
               placeholder="添加条目..."
               style={styles.addItemInput}
             />
-            <button onClick={handleAddItem} style={styles.addItemBtn}>添加</button>
+            <button onClick={handleAddItem} style={styles.addBtn}>添加</button>
           </div>
         </div>
 
@@ -166,8 +166,8 @@ const styles = {
   modal: {
     backgroundColor: '#fff',
     borderRadius: '12px',
-    width: '500px',
-    maxHeight: '80vh',
+    width: '420px',
+    maxHeight: '85vh',
     display: 'flex',
     flexDirection: 'column',
     overflow: 'hidden',
@@ -177,22 +177,23 @@ const styles = {
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: '16px 20px',
-    borderBottom: '1px solid #e0e0e0',
+    borderBottom: '1px solid #eee',
   },
   headerTitle: {
     margin: 0,
-    fontSize: '18px',
+    fontSize: '16px',
     fontWeight: '600',
+    color: '#333',
   },
   closeBtn: {
     background: 'none',
     border: 'none',
-    fontSize: '24px',
+    fontSize: '20px',
     color: '#999',
     cursor: 'pointer',
   },
   body: {
-    padding: '20px',
+    padding: '16px 20px',
     flex: 1,
     overflow: 'auto',
   },
@@ -200,27 +201,26 @@ const styles = {
     width: '100%',
     padding: '10px 12px',
     borderRadius: '6px',
-    border: '1px solid #e0e0e0',
-    fontSize: '16px',
-    marginBottom: '16px',
+    border: '1px solid #ddd',
+    fontSize: '14px',
+    marginBottom: '12px',
     boxSizing: 'border-box',
   },
   itemsList: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '8px',
-    marginBottom: '16px',
-    minHeight: '50px',
+    gap: '6px',
+    marginBottom: '12px',
   },
   item: {
     display: 'flex',
     alignItems: 'center',
-    gap: '10px',
-    padding: '8px 0',
+    gap: '8px',
+    padding: '6px 0',
   },
   checkbox: {
-    width: '18px',
-    height: '18px',
+    width: '16px',
+    height: '16px',
     cursor: 'pointer',
   },
   itemContent: {
@@ -230,8 +230,8 @@ const styles = {
   deleteItemBtn: {
     background: 'none',
     border: 'none',
-    fontSize: '18px',
-    color: '#999',
+    fontSize: '16px',
+    color: '#ccc',
     cursor: 'pointer',
   },
   addItem: {
@@ -242,30 +242,31 @@ const styles = {
     flex: 1,
     padding: '8px 12px',
     borderRadius: '6px',
-    border: '1px solid #e0e0e0',
+    border: '1px solid #ddd',
     fontSize: '14px',
   },
-  addItemBtn: {
-    padding: '8px 16px',
+  addBtn: {
+    padding: '8px 14px',
     borderRadius: '6px',
-    border: 'none',
-    backgroundColor: '#1890ff',
-    color: '#fff',
+    border: '1px solid #ddd',
+    backgroundColor: '#fff',
+    color: '#666',
     fontSize: '14px',
     cursor: 'pointer',
   },
   footer: {
     display: 'flex',
     justifyContent: 'flex-end',
-    gap: '12px',
-    padding: '16px 20px',
-    borderTop: '1px solid #e0e0e0',
+    gap: '10px',
+    padding: '14px 20px',
+    borderTop: '1px solid #eee',
   },
   cancelBtn: {
     padding: '8px 16px',
     borderRadius: '6px',
-    border: '1px solid #e0e0e0',
+    border: '1px solid #ddd',
     backgroundColor: '#fff',
+    color: '#666',
     fontSize: '14px',
     cursor: 'pointer',
   },
