@@ -1,9 +1,49 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 const API_BASE = '/api';
 
 function NoteList({ notes, loading, error, onEditNote, onRefresh, onAddNote }) {
+  const [itemsMap, setItemsMap] = useState({}); // { noteId: [items] }
+
+  const fetchItems = async (noteId) => {
+    const res = await axios.get(`${API_BASE}/notes/${noteId}/items`);
+    setItemsMap(prev => ({ ...prev, [noteId]: res.data }));
+  };
+
+  useEffect(() => {
+    notes.forEach(note => fetchItems(note.id));
+  }, [notes]);
+
+  const handleToggleItem = async (item) => {
+    try {
+      const res = await axios.patch(`${API_BASE}/items/${item.id}`, {
+        completed: !item.completed,
+      });
+      setItemsMap(prev => ({
+        ...prev,
+        [item.note_id]: prev[item.note_id].map(i =>
+          i.id === item.id ? res.data : i
+        ),
+      }));
+    } catch (err) {
+      alert('更新失败');
+    }
+  };
+
+  const handleDeleteItem = async (item) => {
+    if (!window.confirm('确定删除这条目？')) return;
+    try {
+      await axios.delete(`${API_BASE}/items/${item.id}`);
+      setItemsMap(prev => ({
+        ...prev,
+        [item.note_id]: prev[item.note_id].filter(i => i.id !== item.id),
+      }));
+    } catch (err) {
+      alert('删除失败');
+    }
+  };
+
   const handleDeleteNote = async (noteId, e) => {
     e.stopPropagation();
     if (!window.confirm('确定删除这条纪要？')) return;
@@ -50,25 +90,51 @@ function NoteList({ notes, loading, error, onEditNote, onRefresh, onAddNote }) {
         </div>
 
         {notes.map(note => (
-          <div
-            key={note.id}
-            style={styles.card}
-            onClick={() => onEditNote(note)}
-          >
-            <div style={styles.cardHeader}>
-              <div style={styles.date}>{formatDate(note.created_at)}</div>
-              <button
-                onClick={(e) => handleDeleteNote(note.id, e)}
-                style={styles.deleteBtn}
-              >×</button>
+          <div key={note.id}>
+            <div style={styles.card} onClick={() => onEditNote(note)}>
+              <div style={styles.cardHeader}>
+                <div style={styles.date}>{formatDate(note.created_at)}</div>
+                <button
+                  onClick={(e) => handleDeleteNote(note.id, e)}
+                  style={styles.deleteBtn}
+                >×</button>
+              </div>
+              <h3 style={styles.title}>{note.title}</h3>
+              <div style={styles.progressBar}>
+                <div style={{...styles.progressFill, width: `${getProgress(note)}%`}} />
+              </div>
+              <div style={styles.progressText}>
+                {note.completed_items || 0}/{note.total_items || 0} 已完成
+              </div>
             </div>
-            <h3 style={styles.title}>{note.title}</h3>
-            <div style={styles.progressBar}>
-              <div style={{...styles.progressFill, width: `${getProgress(note)}%`}} />
-            </div>
-            <div style={styles.progressText}>
-              {note.completed_items || 0}/{note.total_items || 0} 已完成
-            </div>
+            {itemsMap[note.id]?.length > 0 && (
+              <div style={styles.itemsSection} onClick={() => onEditNote(note)}>
+                {itemsMap[note.id].map(item => (
+                  <div key={item.id} style={styles.item} onClick={e => e.stopPropagation()}>
+                    <input
+                      type="checkbox"
+                      checked={!!item.completed}
+                      onChange={() => handleToggleItem(item)}
+                      style={styles.checkbox}
+                    />
+                    <span style={{
+                      ...styles.itemContent,
+                      textDecoration: item.completed ? 'line-through' : 'none',
+                      color: item.completed ? '#999' : '#333',
+                    }}>
+                      {item.content}
+                    </span>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteItem(item);
+                      }}
+                      style={styles.deleteItemBtn}
+                    >×</button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         ))}
       </div>
@@ -128,7 +194,7 @@ const styles = {
   },
   card: {
     backgroundColor: '#fff',
-    borderRadius: '12px',
+    borderRadius: '12px 12px 0 0',
     padding: '20px',
     cursor: 'pointer',
     boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
@@ -180,6 +246,32 @@ const styles = {
   progressText: {
     fontSize: '12px',
     color: '#999',
+  },
+  itemsSection: {
+    backgroundColor: '#fff',
+    padding: '0 20px 16px',
+  },
+  item: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    padding: '8px 0',
+    borderBottom: '1px solid #f5f5f5',
+  },
+  itemContent: {
+    flex: 1,
+    fontSize: '14px',
+  },
+  deleteItemBtn: {
+    background: 'none',
+    border: 'none',
+    fontSize: '16px',
+    color: '#ccc',
+    cursor: 'pointer',
+    padding: '0 4px',
+  },
+  checkbox: {
+    cursor: 'pointer',
   },
 };
 
