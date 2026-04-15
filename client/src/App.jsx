@@ -52,13 +52,14 @@ function App() {
 
   return (
     <div style={styles.container}>
-      <Header onAddNote={handleCreateNote} />
+      <Header />
       <NoteList
         notes={notes}
         loading={loading}
         error={error}
         onEditNote={handleEditNote}
         onRefresh={fetchNotes}
+        onAddNote={handleCreateNote}
       />
       {modalOpen && (
         <NoteModal

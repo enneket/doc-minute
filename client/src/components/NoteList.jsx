@@ -3,7 +3,7 @@ import axios from 'axios';
 
 const API_BASE = '/api';
 
-function NoteList({ notes, loading, error, onEditNote, onRefresh }) {
+function NoteList({ notes, loading, error, onEditNote, onRefresh, onAddNote }) {
   const handleDeleteNote = async (noteId, e) => {
     e.stopPropagation();
     if (!window.confirm('确定删除这条纪要？')) return;
@@ -44,32 +44,33 @@ function NoteList({ notes, loading, error, onEditNote, onRefresh }) {
   return (
     <div style={styles.container}>
       <div style={styles.grid}>
-        {notes.length === 0 ? (
-          <div style={styles.empty}>暂无纪要，点击 + 创建</div>
-        ) : (
-          notes.map(note => (
-            <div
-              key={note.id}
-              style={styles.card}
-              onClick={() => onEditNote(note)}
-            >
-              <div style={styles.cardHeader}>
-                <div style={styles.date}>{formatDate(note.created_at)}</div>
-                <button
-                  onClick={(e) => handleDeleteNote(note.id, e)}
-                  style={styles.deleteBtn}
-                >×</button>
-              </div>
-              <h3 style={styles.title}>{note.title}</h3>
-              <div style={styles.progressBar}>
-                <div style={{...styles.progressFill, width: `${getProgress(note)}%`}} />
-              </div>
-              <div style={styles.progressText}>
-                {note.completed_items || 0}/{note.total_items || 0} 已完成
-              </div>
+        <div style={styles.createCard} onClick={onAddNote}>
+          <div style={styles.addIcon}>+</div>
+          <div style={styles.addText}>新建纪要</div>
+        </div>
+
+        {notes.map(note => (
+          <div
+            key={note.id}
+            style={styles.card}
+            onClick={() => onEditNote(note)}
+          >
+            <div style={styles.cardHeader}>
+              <div style={styles.date}>{formatDate(note.created_at)}</div>
+              <button
+                onClick={(e) => handleDeleteNote(note.id, e)}
+                style={styles.deleteBtn}
+              >×</button>
             </div>
-          ))
-        )}
+            <h3 style={styles.title}>{note.title}</h3>
+            <div style={styles.progressBar}>
+              <div style={{...styles.progressFill, width: `${getProgress(note)}%`}} />
+            </div>
+            <div style={styles.progressText}>
+              {note.completed_items || 0}/{note.total_items || 0} 已完成
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -78,7 +79,7 @@ function NoteList({ notes, loading, error, onEditNote, onRefresh }) {
 const styles = {
   container: {
     padding: '24px',
-    minHeight: 'calc(100vh - 73px)',
+    minHeight: 'calc(100vh - 57px)',
   },
   grid: {
     display: 'grid',
@@ -102,12 +103,28 @@ const styles = {
     backgroundColor: '#fff',
     cursor: 'pointer',
   },
-  empty: {
-    gridColumn: '1 / -1',
-    textAlign: 'center',
+  createCard: {
+    backgroundColor: '#fff',
+    borderRadius: '12px',
+    padding: '40px 20px',
+    cursor: 'pointer',
+    boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+    border: '2px dashed #ddd',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: '160px',
+    transition: 'border-color 0.2s, background-color 0.2s',
+  },
+  addIcon: {
+    fontSize: '32px',
+    color: '#1890ff',
+    marginBottom: '8px',
+  },
+  addText: {
+    fontSize: '14px',
     color: '#999',
-    padding: '80px 0',
-    fontSize: '16px',
   },
   card: {
     backgroundColor: '#fff',
