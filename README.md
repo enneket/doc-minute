@@ -14,10 +14,11 @@
 ### Docker 部署
 
 ```bash
-# 构建镜像
-docker build -t doc-minute .
+# 使用 docker-compose (推荐)
+docker compose up -d
 
-# 运行容器 (数据持久化)
+# 或手动构建运行
+docker build -t doc-minute .
 docker run -d --name doc-minute -p 5567:5567 -v doc-minute-data:/app/server doc-minute
 ```
 
