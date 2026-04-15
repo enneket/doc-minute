@@ -1,13 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React from 'react';
 
-const API_BASE = 'http://localhost:3001/api';
-
-function NoteList({ notes, onEditNote, onRefresh }) {
-  const handleDeleteNote = async (noteId) => {
+function NoteList({ notes, loading, error, onEditNote, onRefresh }) {
+  const handleDeleteNote = async (noteId, e) => {
+    e.stopPropagation();
     if (!window.confirm('确定删除这条纪要？')) return;
-    await axios.delete(`${API_BASE}/notes/${noteId}`);
-    onRefresh();
+    try {
+      const { default: axios } = await import('axios');
+      await axios.delete(`http://localhost:3001/api/notes/${noteId}`);
+      onRefresh();
+    } catch (err) {
+      alert('删除失败');
+    }
   };
 
   const formatDate = (dateStr) => {
@@ -26,6 +29,19 @@ function NoteList({ notes, onEditNote, onRefresh }) {
     return `${note.completed_items || 0}/${note.total_items}`;
   };
 
+  if (loading) {
+    return <div style={styles.state}>加载中...</div>;
+  }
+
+  if (error) {
+    return (
+      <div style={styles.state}>
+        <div style={styles.error}>{error}</div>
+        <button onClick={onRefresh} style={styles.retryBtn}>重试</button>
+      </div>
+    );
+  }
+
   return (
     <div style={styles.list}>
       {notes.length === 0 ? (
@@ -40,7 +56,7 @@ function NoteList({ notes, onEditNote, onRefresh }) {
             <div style={styles.noteHeader}>
               <h3 style={styles.noteTitle}>{note.title}</h3>
               <button
-                onClick={(e) => { e.stopPropagation(); handleDeleteNote(note.id); }}
+                onClick={(e) => handleDeleteNote(note.id, e)}
                 style={styles.deleteBtn}
               >×</button>
             </div>
@@ -61,6 +77,23 @@ const styles = {
     display: 'flex',
     flexDirection: 'column',
     gap: '12px',
+  },
+  state: {
+    textAlign: 'center',
+    color: '#999',
+    padding: '48px 0',
+    fontSize: '14px',
+  },
+  error: {
+    color: '#ff4d4f',
+    marginBottom: '12px',
+  },
+  retryBtn: {
+    padding: '8px 16px',
+    borderRadius: '6px',
+    border: '1px solid #e0e0e0',
+    backgroundColor: '#fff',
+    cursor: 'pointer',
   },
   empty: {
     textAlign: 'center',

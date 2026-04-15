@@ -8,12 +8,22 @@ const API_BASE = 'http://localhost:3001/api';
 
 function App() {
   const [notes, setNotes] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingNote, setEditingNote] = useState(null);
 
   const fetchNotes = async () => {
-    const res = await axios.get(`${API_BASE}/notes`);
-    setNotes(res.data);
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await axios.get(`${API_BASE}/notes`);
+      setNotes(res.data);
+    } catch (err) {
+      setError('加载失败: ' + (err.message || '未知错误'));
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -43,7 +53,13 @@ function App() {
   return (
     <div style={styles.container}>
       <Header onAddNote={handleCreateNote} />
-      <NoteList notes={notes} onEditNote={handleEditNote} onRefresh={fetchNotes} />
+      <NoteList
+        notes={notes}
+        loading={loading}
+        error={error}
+        onEditNote={handleEditNote}
+        onRefresh={fetchNotes}
+      />
       {modalOpen && (
         <NoteModal
           note={editingNote}
