@@ -34,4 +34,16 @@ router.delete('/:id', (req, res) => {
   res.json({ success: true });
 });
 
+// PUT /api/notes/:id - 更新纪要
+router.put('/:id', (req, res) => {
+  const { id } = req.params;
+  const { title } = req.body;
+  if (!title) {
+    return res.status(400).json({ error: '标题不能为空' });
+  }
+  db.prepare('UPDATE notes SET title = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?').run(title, id);
+  const note = db.prepare('SELECT * FROM notes WHERE id = ?').get(id);
+  res.json(note);
+});
+
 module.exports = router;

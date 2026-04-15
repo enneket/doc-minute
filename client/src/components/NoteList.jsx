@@ -1,12 +1,14 @@
 import React from 'react';
+import axios from 'axios';
+
+const API_BASE = 'http://localhost:3001/api';
 
 function NoteList({ notes, loading, error, onEditNote, onRefresh }) {
   const handleDeleteNote = async (noteId, e) => {
     e.stopPropagation();
     if (!window.confirm('确定删除这条纪要？')) return;
     try {
-      const { default: axios } = await import('axios');
-      await axios.delete(`http://localhost:3001/api/notes/${noteId}`);
+      await axios.delete(`${API_BASE}/notes/${noteId}`);
       onRefresh();
     } catch (err) {
       alert('删除失败');

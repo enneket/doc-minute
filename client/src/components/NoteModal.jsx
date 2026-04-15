@@ -26,8 +26,8 @@ function NoteModal({ note, onSave, onClose }) {
     }
 
     if (note?.id) {
-      // 更新已有纪要
-      // nothing to update for note title in this simple impl
+      // 更新已有纪要标题
+      await axios.put(`${API_BASE}/notes/${note.id}`, { title });
       onSave();
     } else {
       // 创建新纪要 + items
@@ -56,10 +56,14 @@ function NoteModal({ note, onSave, onClose }) {
       ));
       return;
     }
-    const res = await axios.patch(`${API_BASE}/items/${item.id}`, {
-      completed: !item.completed,
-    });
-    setItems(items.map(i => i.id === item.id ? res.data : i));
+    try {
+      const res = await axios.patch(`${API_BASE}/items/${item.id}`, {
+        completed: !item.completed,
+      });
+      setItems(items.map(i => i.id === item.id ? res.data : i));
+    } catch (err) {
+      alert('更新失败');
+    }
   };
 
   const handleDeleteItem = async (item) => {
@@ -67,8 +71,12 @@ function NoteModal({ note, onSave, onClose }) {
       setItems(items.filter(i => i.id !== item.id));
       return;
     }
-    await axios.delete(`${API_BASE}/items/${item.id}`);
-    setItems(items.filter(i => i.id !== item.id));
+    try {
+      await axios.delete(`${API_BASE}/items/${item.id}`);
+      setItems(items.filter(i => i.id !== item.id));
+    } catch (err) {
+      alert('删除失败');
+    }
   };
 
   const handleKeyPress = (e) => {
