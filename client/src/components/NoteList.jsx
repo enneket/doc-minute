@@ -151,6 +151,7 @@ const styles = {
     display: 'grid',
     gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
     gap: '20px',
+    alignItems: 'start',
   },
   state: {
     textAlign: 'center',
