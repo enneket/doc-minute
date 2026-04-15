@@ -18,17 +18,14 @@ function NoteList({ notes, loading, error, onEditNote, onRefresh }) {
   const formatDate = (dateStr) => {
     const date = new Date(dateStr);
     return date.toLocaleDateString('zh-CN', {
-      year: 'numeric',
       month: '2-digit',
       day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
     });
   };
 
   const getProgress = (note) => {
-    if (!note.total_items) return '0/0';
-    return `${note.completed_items || 0}/${note.total_items}`;
+    if (!note.total_items) return 0;
+    return Math.round((note.completed_items || 0) / note.total_items * 100);
   };
 
   if (loading) {
@@ -45,40 +42,48 @@ function NoteList({ notes, loading, error, onEditNote, onRefresh }) {
   }
 
   return (
-    <div style={styles.list}>
-      {notes.length === 0 ? (
-        <div style={styles.empty}>暂无纪要，点击 + 创建</div>
-      ) : (
-        notes.map(note => (
-          <div
-            key={note.id}
-            style={styles.noteCard}
-            onClick={() => onEditNote(note)}
-          >
-            <div style={styles.noteHeader}>
-              <h3 style={styles.noteTitle}>{note.title}</h3>
-              <button
-                onClick={(e) => handleDeleteNote(note.id, e)}
-                style={styles.deleteBtn}
-              >×</button>
+    <div style={styles.container}>
+      <div style={styles.grid}>
+        {notes.length === 0 ? (
+          <div style={styles.empty}>暂无纪要，点击 + 创建</div>
+        ) : (
+          notes.map(note => (
+            <div
+              key={note.id}
+              style={styles.card}
+              onClick={() => onEditNote(note)}
+            >
+              <div style={styles.cardHeader}>
+                <div style={styles.date}>{formatDate(note.created_at)}</div>
+                <button
+                  onClick={(e) => handleDeleteNote(note.id, e)}
+                  style={styles.deleteBtn}
+                >×</button>
+              </div>
+              <h3 style={styles.title}>{note.title}</h3>
+              <div style={styles.progressBar}>
+                <div style={{...styles.progressFill, width: `${getProgress(note)}%`}} />
+              </div>
+              <div style={styles.progressText}>
+                {note.completed_items || 0}/{note.total_items || 0} 已完成
+              </div>
             </div>
-            <div style={styles.noteMeta}>
-              <span style={styles.date}>{formatDate(note.created_at)}</span>
-              <span style={styles.progress}>{getProgress(note)}</span>
-            </div>
-          </div>
-        ))
-      )}
+          ))
+        )}
+      </div>
     </div>
   );
 }
 
 const styles = {
-  list: {
-    padding: '16px 24px',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '12px',
+  container: {
+    padding: '24px',
+    minHeight: 'calc(100vh - 73px)',
+  },
+  grid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+    gap: '20px',
   },
   state: {
     textAlign: 'center',
@@ -98,48 +103,66 @@ const styles = {
     cursor: 'pointer',
   },
   empty: {
+    gridColumn: '1 / -1',
     textAlign: 'center',
     color: '#999',
-    padding: '48px 0',
-    fontSize: '14px',
+    padding: '80px 0',
+    fontSize: '16px',
   },
-  noteCard: {
+  card: {
     backgroundColor: '#fff',
-    borderRadius: '8px',
-    padding: '16px',
+    borderRadius: '12px',
+    padding: '20px',
     cursor: 'pointer',
-    boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+    boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+    transition: 'transform 0.2s, box-shadow 0.2s',
+    border: '1px solid #f0f0f0',
   },
-  noteHeader: {
+  cardHeader: {
     display: 'flex',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    alignItems: 'center',
+    marginBottom: '12px',
   },
-  noteTitle: {
-    margin: '0 0 8px 0',
-    fontSize: '16px',
-    fontWeight: '500',
-    color: '#333',
+  date: {
+    fontSize: '12px',
+    color: '#999',
+    backgroundColor: '#f5f5f5',
+    padding: '4px 8px',
+    borderRadius: '4px',
   },
   deleteBtn: {
     background: 'none',
     border: 'none',
     fontSize: '20px',
-    color: '#999',
+    color: '#ccc',
     cursor: 'pointer',
     padding: '0 4px',
+    transition: 'color 0.2s',
   },
-  noteMeta: {
-    display: 'flex',
-    justifyContent: 'space-between',
+  title: {
+    margin: '0 0 16px 0',
+    fontSize: '18px',
+    fontWeight: '600',
+    color: '#333',
+    lineHeight: '1.4',
+  },
+  progressBar: {
+    height: '6px',
+    backgroundColor: '#f0f0f0',
+    borderRadius: '3px',
+    overflow: 'hidden',
+    marginBottom: '8px',
+  },
+  progressFill: {
+    height: '100%',
+    backgroundColor: '#52c41a',
+    borderRadius: '3px',
+    transition: 'width 0.3s ease',
+  },
+  progressText: {
     fontSize: '12px',
     color: '#999',
-  },
-  date: {},
-  progress: {
-    backgroundColor: '#f0f0f0',
-    padding: '2px 8px',
-    borderRadius: '4px',
   },
 };
 
