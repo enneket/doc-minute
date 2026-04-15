@@ -90,8 +90,8 @@ function NoteList({ notes, loading, error, onEditNote, onRefresh, onAddNote }) {
         </div>
 
         {notes.map(note => (
-          <div key={note.id}>
-            <div style={styles.card} onClick={() => onEditNote(note)}>
+          <div key={note.id} style={styles.noteCard} onClick={() => onEditNote(note)}>
+            <div style={styles.cardContent}>
               <div style={styles.cardHeader}>
                 <div style={styles.date}>{formatDate(note.created_at)}</div>
                 <button
@@ -107,34 +107,30 @@ function NoteList({ notes, loading, error, onEditNote, onRefresh, onAddNote }) {
                 {note.completed_items || 0}/{note.total_items || 0} 已完成
               </div>
             </div>
-            {itemsMap[note.id]?.length > 0 && (
-              <div style={styles.itemsSection} onClick={() => onEditNote(note)}>
-                {itemsMap[note.id].map(item => (
-                  <div key={item.id} style={styles.item} onClick={e => e.stopPropagation()}>
-                    <input
-                      type="checkbox"
-                      checked={!!item.completed}
-                      onChange={() => handleToggleItem(item)}
-                      style={styles.checkbox}
-                    />
-                    <span style={{
-                      ...styles.itemContent,
-                      textDecoration: item.completed ? 'line-through' : 'none',
-                      color: item.completed ? '#999' : '#333',
-                    }}>
-                      {item.content}
-                    </span>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDeleteItem(item);
-                      }}
-                      style={styles.deleteItemBtn}
-                    >×</button>
-                  </div>
-                ))}
+            {itemsMap[note.id]?.map(item => (
+              <div key={item.id} style={styles.item} onClick={e => e.stopPropagation()}>
+                <input
+                  type="checkbox"
+                  checked={!!item.completed}
+                  onChange={() => handleToggleItem(item)}
+                  style={styles.checkbox}
+                />
+                <span style={{
+                  ...styles.itemContent,
+                  textDecoration: item.completed ? 'line-through' : 'none',
+                  color: item.completed ? '#999' : '#333',
+                }}>
+                  {item.content}
+                </span>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDeleteItem(item);
+                  }}
+                  style={styles.deleteItemBtn}
+                >×</button>
               </div>
-            )}
+            ))}
           </div>
         ))}
       </div>
@@ -151,6 +147,7 @@ const styles = {
     display: 'grid',
     gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
     gap: '20px',
+    alignItems: 'start',
   },
   state: {
     textAlign: 'center',
@@ -192,14 +189,20 @@ const styles = {
     fontSize: '14px',
     color: '#999',
   },
-  card: {
+  noteCard: {
     backgroundColor: '#fff',
-    borderRadius: '12px 12px 0 0',
-    padding: '20px',
-    cursor: 'pointer',
+    borderRadius: '12px',
     boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-    transition: 'transform 0.2s, box-shadow 0.2s',
     border: '1px solid #f0f0f0',
+    overflow: 'hidden',
+    cursor: 'pointer',
+    display: 'flex',
+    flexDirection: 'column',
+    minHeight: '160px',
+  },
+  cardContent: {
+    padding: '20px',
+    flex: 1,
   },
   cardHeader: {
     display: 'flex',
@@ -247,16 +250,12 @@ const styles = {
     fontSize: '12px',
     color: '#999',
   },
-  itemsSection: {
-    backgroundColor: '#fff',
-    padding: '0 20px 16px',
-  },
   item: {
     display: 'flex',
     alignItems: 'center',
     gap: '8px',
-    padding: '8px 0',
-    borderBottom: '1px solid #f5f5f5',
+    padding: '8px 20px',
+    borderTop: '1px solid #f5f5f5',
   },
   itemContent: {
     flex: 1,
