@@ -8,11 +8,15 @@ function NoteModal({ note, onSave, onClose }) {
   const [items, setItems] = useState([]);
   const [newItemContent, setNewItemContent] = useState('');
 
+  // 重置状态当 note 改变时
   useEffect(() => {
+    setTitle(note?.title || '');
+    setItems([]);
+    setNewItemContent('');
     if (note?.id) {
       fetchItems();
     }
-  }, [note]);
+  }, [note?.id]);
 
   const fetchItems = async () => {
     const res = await axios.get(`${API_BASE}/notes/${note.id}/items`);
@@ -26,14 +30,11 @@ function NoteModal({ note, onSave, onClose }) {
     }
 
     if (note?.id) {
-      // 更新已有纪要标题
       await axios.put(`${API_BASE}/notes/${note.id}`, { title });
       onSave();
     } else {
-      // 创建新纪要 + items
       const res = await axios.post(`${API_BASE}/notes`, { title });
       const newNoteId = res.data.id;
-      // 添加所有 items
       for (const item of items) {
         await axios.post(`${API_BASE}/notes/${newNoteId}/items`, {
           content: item.content,
@@ -45,7 +46,8 @@ function NoteModal({ note, onSave, onClose }) {
 
   const handleAddItem = () => {
     if (!newItemContent.trim()) return;
-    setItems([...items, { id: Date.now(), content: newItemContent, completed: false }]);
+    const newItem = { id: Date.now(), content: newItemContent, completed: false };
+    setItems([...items, newItem]);
     setNewItemContent('');
   };
 
@@ -208,6 +210,7 @@ const styles = {
     flexDirection: 'column',
     gap: '8px',
     marginBottom: '16px',
+    minHeight: '50px',
   },
   item: {
     display: 'flex',
