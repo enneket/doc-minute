@@ -5,9 +5,10 @@ const db = require('../db');
 // GET /api/notes/:noteId/items - 获取纪要的所有条目
 router.get('/:noteId/items', (req, res) => {
   const { noteId } = req.params;
-  const items = db.prepare(
-    'SELECT * FROM items WHERE note_id = ? ORDER BY order_index ASC'
-  ).all(noteId);
+  const items = db.query(
+    'SELECT * FROM items WHERE note_id = ? ORDER BY order_index ASC',
+    [noteId]
+  );
   res.json(items);
 });
 
@@ -18,14 +19,16 @@ router.post('/:noteId/items', (req, res) => {
   if (!content) {
     return res.status(400).json({ error: '内容不能为空' });
   }
-  const maxOrder = db.prepare(
-    'SELECT MAX(order_index) as max FROM items WHERE note_id = ?'
-  ).get(noteId);
-  const orderIndex = (maxOrder.max || 0) + 1;
-  const result = db.prepare(
-    'INSERT INTO items (note_id, content, order_index) VALUES (?, ?, ?)'
-  ).run(noteId, content, orderIndex);
-  const item = db.prepare('SELECT * FROM items WHERE id = ?').get(result.lastInsertRowid);
+  const maxOrder = db.queryOne(
+    'SELECT MAX(order_index) as max FROM items WHERE note_id = ?',
+    [noteId]
+  );
+  const orderIndex = (maxOrder?.max || 0) + 1;
+  const result = db.execute(
+    'INSERT INTO items (note_id, content, order_index) VALUES (?, ?, ?)',
+    [noteId, content, orderIndex]
+  );
+  const item = db.queryOne('SELECT * FROM items WHERE id = ?', [result.lastInsertRowid]);
   res.json(item);
 });
 
@@ -33,25 +36,26 @@ router.post('/:noteId/items', (req, res) => {
 router.patch('/:id', (req, res) => {
   const { id } = req.params;
   const { content, completed } = req.body;
-  const item = db.prepare('SELECT * FROM items WHERE id = ?').get(id);
+  const item = db.queryOne('SELECT * FROM items WHERE id = ?', [id]);
   if (!item) {
     return res.status(404).json({ error: '条目不存在' });
   }
-  db.prepare(
-    'UPDATE items SET content = ?, completed = ? WHERE id = ?'
-  ).run(
-    content !== undefined ? content : item.content,
-    completed !== undefined ? (completed ? 1 : 0) : item.completed,
-    id
+  db.execute(
+    'UPDATE items SET content = ?, completed = ? WHERE id = ?',
+    [
+      content !== undefined ? content : item.content,
+      completed !== undefined ? (completed ? 1 : 0) : item.completed,
+      id
+    ]
   );
-  const updated = db.prepare('SELECT * FROM items WHERE id = ?').get(id);
+  const updated = db.queryOne('SELECT * FROM items WHERE id = ?', [id]);
   res.json(updated);
 });
 
 // DELETE /api/items/:id - 删除条目
 router.delete('/:id', (req, res) => {
   const { id } = req.params;
-  db.prepare('DELETE FROM items WHERE id = ?').run(id);
+  db.execute('DELETE FROM items WHERE id = ?', [id]);
   res.json({ success: true });
 });
 
