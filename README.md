@@ -23,12 +23,12 @@ docker compose up -d
 
 # 或手动构建运行
 docker build -t doc-minute .
-docker run -d --name doc-minute -p 5567:5567 -v $(pwd)/server/notes.db:/app/server/notes.db doc-minute
+docker run -d --name doc-minute -p 5567:5567 -v $(pwd)/db:/app/db doc-minute
 ```
 
 访问 http://localhost:5567
 
-**数据持久化**: 只挂载数据库文件 `notes.db`，代码和依赖在容器内。
+**数据持久化**: 数据库文件保存在 `db/` 目录，映射到容器内 `/app/db`。
 
 **端口说明**: 容器内部端口 5567，映射到主机 5567
 
@@ -64,6 +64,7 @@ doc-minute/
 │           ├── Header.jsx
 │           ├── NoteList.jsx
 │           └── NoteModal.jsx
+├── db/               # 数据库文件
 ├── server/           # Node.js 后端
 │   ├── index.js
 │   ├── db.js
@@ -72,6 +73,7 @@ doc-minute/
 │       └── items.js
 ├── docs/             # 设计文档
 ├── Dockerfile
+├── docker-compose.yml
 └── README.md
 ```
 
