@@ -23,12 +23,12 @@ docker compose up -d
 
 # 或手动构建运行
 docker build -t doc-minute .
-docker run -d --name doc-minute -p 5567:5567 -v $(pwd)/server:/app/server doc-minute
+docker run -d --name doc-minute -p 5567:5567 -v $(pwd)/server/notes.db:/app/server/notes.db doc-minute
 ```
 
 访问 http://localhost:5567
 
-**数据持久化**: 通过 bind mount 将本地 `server` 目录映射到容器，数据库文件保存在本地。
+**数据持久化**: 只挂载数据库文件 `notes.db`，代码和依赖在容器内。
 
 **端口说明**: 容器内部端口 5567，映射到主机 5567
 
