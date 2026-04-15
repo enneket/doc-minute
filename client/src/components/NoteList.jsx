@@ -1,7 +1,7 @@
 import React from 'react';
 import axios from 'axios';
 
-const API_BASE = 'http://localhost:3001/api';
+const API_BASE = '/api';
 
 function NoteList({ notes, loading, error, onEditNote, onRefresh }) {
   const handleDeleteNote = async (noteId, e) => {

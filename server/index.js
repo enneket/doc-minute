@@ -1,22 +1,27 @@
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 const notesRouter = require('./routes/notes');
 const itemsRouter = require('./routes/items');
 
 const app = express();
-const PORT = 3001;
+const PORT = process.env.PORT || 5567;
 
 app.use(cors());
 app.use(express.json());
 
-// notes 路由: /api/notes, /api/notes/:id
+// API 路由
 app.use('/api/notes', notesRouter);
-
-// items 路由同时挂载到两个路径:
-// - /api/notes/:noteId/items (GET, POST)
-// - /api/items/:id (PATCH, DELETE)
 app.use('/api/notes', itemsRouter);
 app.use('/api/items', itemsRouter);
+
+// 静态文件服务 (前端构建产物)
+app.use(express.static(path.join(__dirname, '../client/dist')));
+
+// 所有其他路径返回 index.html (SPA 支持)
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../client/dist/index.html'));
+});
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
