@@ -35,15 +35,7 @@ function App() {
     setEditingNote(null);
   };
 
-  const handleSaveNote = async (noteData) => {
-    if (editingNote) {
-      // 更新已有纪要（标题）
-      await axios.put(`${API_BASE}/notes/${editingNote.id}`, { title: noteData.title });
-    } else {
-      // 创建新纪要
-      const res = await axios.post(`${API_BASE}/notes`, { title: noteData.title });
-      editingNote = { id: res.data.id };
-    }
+  const handleSaveNote = () => {
     fetchNotes();
     handleCloseModal();
   };

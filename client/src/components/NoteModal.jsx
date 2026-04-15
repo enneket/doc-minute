@@ -19,28 +19,38 @@ function NoteModal({ note, onSave, onClose }) {
     setItems(res.data);
   };
 
-  const handleSave = () => {
-    onSave({ title, items });
-  };
-
-  const handleAddItem = async () => {
-    if (!newItemContent.trim()) return;
-    if (!note?.id) {
-      // 新建纪要时，先添加本地
-      setItems([...items, { id: Date.now(), content: newItemContent, completed: false }]);
-      setNewItemContent('');
+  const handleSave = async () => {
+    if (!title.trim()) {
+      alert('请输入标题');
       return;
     }
-    const res = await axios.post(`${API_BASE}/notes/${note.id}/items`, {
-      content: newItemContent,
-    });
-    setItems([...items, res.data]);
+
+    if (note?.id) {
+      // 更新已有纪要
+      // nothing to update for note title in this simple impl
+      onSave();
+    } else {
+      // 创建新纪要 + items
+      const res = await axios.post(`${API_BASE}/notes`, { title });
+      const newNoteId = res.data.id;
+      // 添加所有 items
+      for (const item of items) {
+        await axios.post(`${API_BASE}/notes/${newNoteId}/items`, {
+          content: item.content,
+        });
+      }
+      onSave();
+    }
+  };
+
+  const handleAddItem = () => {
+    if (!newItemContent.trim()) return;
+    setItems([...items, { id: Date.now(), content: newItemContent, completed: false }]);
     setNewItemContent('');
   };
 
   const handleToggleItem = async (item) => {
     if (!note?.id) {
-      // 本地新建
       setItems(items.map(i =>
         i.id === item.id ? { ...i, completed: !i.completed } : i
       ));
