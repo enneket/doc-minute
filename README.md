@@ -17,11 +17,13 @@
 # 构建镜像
 docker build -t doc-minute .
 
-# 运行容器
-docker run -d --name doc-minute -p 5567:5567 doc-minute
+# 运行容器 (数据持久化)
+docker run -d --name doc-minute -p 5567:5567 -v doc-minute-data:/app/server doc-minute
 ```
 
 访问 http://localhost:5567
+
+**数据持久化**: 使用 Docker volume `doc-minute-data` 存储 SQLite 数据库，删除容器后数据不丢失。
 
 **端口说明**: 容器内部端口 5567，映射到主机 5567
 
