@@ -177,7 +177,6 @@ const styles = {
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    minHeight: '160px',
     transition: 'border-color 0.2s, background-color 0.2s',
   },
   addIcon: {
