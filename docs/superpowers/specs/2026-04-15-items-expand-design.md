@@ -1,77 +1,119 @@
-# 纪要条目展开设计
+# 纪要条目展开设计 v2
 
-## 概述
+## 更新说明
 
-将条目的展示从卡片内部移出，改为显示在对应卡片下方。卡片高度根据条目数量自动调整，实现类似待办清单的展开效果。
+用户反馈：之前的实现中，同一行的卡片高度被 grid 统一了。用户希望每个卡片根据条目数量独立调整高度，形成错落的瀑布流效果。
 
 ## 设计决策
 
 | 决策 | 选择 |
 |------|------|
-| 布局模式 | 卡片展开模式 — 条目直接显示在卡片下方 |
+| 布局模式 | CSS Grid 改为 inline-block 或 flex-wrap，实现独立高度 |
 | 视觉风格 | 卡片延伸 — 条目区域与卡片使用相同的背景色和圆角 |
 
 ## 布局结构
 
 ```
-┌─────────────────────────┐
-│ 04/15              ×    │  ← 卡片头部
-│                         │
-│ 测试会议                 │  ← 标题
-│ ████████░░░░  2/5       │  ← 进度条 + 进度文字
-└─────────────────────────┘  ← 卡片底部（圆角）
-┌─────────────────────────┐  ← 条目区域（与卡片无缝衔接）
-│ ○ 第一个条目             │
-│ ○ 第二个条目             │
-│ ● 第三个条目（已完成）     │
-│ ○ 第四个条目             │
-│ ○ 第五个条目             │
-└─────────────────────────┘
+┌────────────────┐  ┌────────────────────┐
+│ 04/15      ×  │  │ 04/15          ×  │
+│ 测试会议        │  │ 较长标题的会议      │
+│ ████░░  2/5   │  │ ██████░░  3/6    │
+└────────────────┘  │ ○ 第一个条目        │
+┌────────────────┐  │ ○ 第二个条目        │
+│ ○ 第一个条目    │  │ ● 第三个条目(完成)  │
+│ ○ 第二个条目    │  │ ○ 第四个条目        │
+└────────────────┘  │ ○ 第五个条目        │
+                    │ ○ 第六个条目        │
+┌────────────────┐  └────────────────────┘
+│ 04/15      ×  │
+│ 另一个会议      │
+│ ██░░░░  1/4   │
+│ ○ 条目一       │
+└────────────────┘
+```
+
+**效果：**
+- 第一行两个卡片高度独立
+- 第二个卡片因条目较多而更高
+- 下方卡片自动向上补位（类似瀑布流）
+
+## 实现方案
+
+### 方案：CSS Grid + grid-auto-flow: dense
+
+```css
+grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-auto-flow: row dense;
+}
+```
+
+但这仍然会让同行卡片等高。更符合需求的方案是：
+
+### 推荐方案：flexbox with flex-wrap
+
+```css
+flexContainer {
+  display: flex;
+  flexWrap: wrap;
+  gap: 20px;
+}
+
+cardWrapper {
+  flexBasis: 280px;
+  flexGrow: 1;
+  /* 让卡片宽度自适应 */
+}
+```
+
+或者使用 `align-items: flex-start` 让卡片保持独立高度：
+
+```css
+grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  align-items: start;  /* 关键：让卡片顶部对齐，高度由内容决定 */
+}
 ```
 
 ## 组件变更
 
 ### NoteList.jsx
 
-**卡片结构变化：**
-- 每个 note 卡片包含两个部分：`cardWrapper`（卡片本身）和 `itemsSection`（条目区域）
-- `itemsSection` 直接跟在卡片下方，无间隔
-- 卡片使用固定圆角（上方12px，下方0）；条目区域圆角反转（下0，上0）
-
 **样式调整：**
-- `card` 样式：`border-radius: 12px 12px 0 0`（下方无圆角）
-- 新增 `itemsSection` 样式：`backgroundColor: '#fff'`, `border-radius: 0`, `padding: 0 20px 16px`
-- 条目使用列表样式：`listStyle: 'none'`, `padding: 0`, `margin: 0`
+- 将 `grid` 样式改为使用 `alignItems: 'start'`
+- 每个卡片外层 wrapper 保持独立
 
-**交互逻辑：**
-- 编辑/删除按钮保留在卡片头部
-- 点击整个卡片区域（包括条目区域）打开编辑弹窗
-- 条目的 checkbox 点击不触发卡片点击事件（阻止冒泡）
+```jsx
+grid: {
+  display: 'grid',
+  gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+  gap: '20px',
+  alignItems: 'start',  // 关键：卡片顶部对齐，独立高度
+}
+```
 
-### 条目展示规则
+**卡片结构：**
+- wrapper div 控制布局
+- card + itemsSection 作为整体
 
-- 显示所有条目，无需折叠
-- 每条显示：checkbox（可点击切换状态）+ 内容文字 + 删除按钮
-- 已完成条目：文字带删除线，颜色变浅
-- 无条目时：条目区域不显示
-
-## 数据流
-
-- 卡片展示时，API 返回 `total_items` 和 `completed_items`
-- 展开条目需要额外请求：`GET /api/notes/:id/items`
-- 点击条目 checkbox：`PATCH /api/items/:id` 更新 `completed` 状态
-- 删除条目：`DELETE /api/items/:id`
-
-## 实现文件
-
-- `client/src/components/NoteList.jsx` — 主要变更
-- `client/src/components/NoteModal.jsx` — 无变更
-- `server/routes/items.js` — 无变更
+```jsx
+<div style={styles.cardWrapper}>  {/* 控制 flex 布局 */}
+  <div style={styles.card} onClick={() => onEditNote(note)}>
+    {/* 卡片内容 */}
+  </div>
+  {itemsMap[note.id]?.length > 0 && (
+    <div style={styles.itemsSection}>
+      {/* 条目列表 */}
+    </div>
+  )}
+</div>
+```
 
 ## 验证标准
 
-1. 卡片下方直接显示条目列表，无间隔
-2. 条目数量变化时，卡片+条目整体高度自动调整
-3. 条目区域与卡片视觉上无缝衔接（同一背景色）
-4. 点击条目 checkbox 可以切换完成状态
-5. 点击卡片任意位置打开编辑弹窗（checkbox 除外）
+1. 同一行卡片高度独立，不被最长卡片撑开
+2. 下方卡片自动向上补位，不留空白
+3. 响应式：窄屏时自动换行
+4. 条目数量变化时，对应卡片高度自动调整
