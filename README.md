@@ -6,45 +6,32 @@
 
 - **前端**: React + Vite
 - **后端**: Node.js + Express
-- **数据库**: SQLite
+- **数据库**: SQLite (sql.js)
+- **容器化**: Docker
 
 ## 快速开始
 
-### 1. 安装依赖
+### Docker 部署
 
 ```bash
-# 安装后端依赖
-cd server
-npm install
-
-# 安装前端依赖
-cd ../client
-npm install
+docker build -t doc-minute .
+docker run -d --name doc-minute -p 5567:5567 doc-minute
 ```
 
-### 2. 启动后端
+访问 http://localhost:5567
+
+### 本地开发
 
 ```bash
-cd server
-node index.js
-```
+# 安装依赖
+cd server && npm install
+cd ../client && npm install
 
-后端运行在 http://localhost:3001
+# 启动后端 (端口 3001)
+cd server && node index.js
 
-### 3. 启动前端
-
-```bash
-cd client
-npm run dev
-```
-
-前端运行在 http://localhost:5173
-
-### 4. 一键启动
-
-```bash
-# 同时启动前端和后端
-npm run dev
+# 启动前端 (端口 5173)
+cd client && npm run dev
 ```
 
 ## 功能
@@ -55,20 +42,12 @@ npm run dev
 - 首页显示每条纪要的完成进度
 - 点击纪要卡片编辑内容
 
-## 测试
-
-```bash
-cd server
-npm test
-```
-
 ## 项目结构
 
 ```
 doc-minute/
 ├── client/           # React 前端
 │   └── src/
-│       ├── App.jsx
 │       └── components/
 │           ├── Header.jsx
 │           ├── NoteList.jsx
@@ -79,5 +58,20 @@ doc-minute/
 │   └── routes/
 │       ├── notes.js
 │       └── items.js
+├── docs/             # 设计文档
+├── Dockerfile
 └── README.md
 ```
+
+## API
+
+| 方法 | 路径 | 描述 |
+|------|------|------|
+| GET | /api/notes | 获取所有纪要 |
+| POST | /api/notes | 创建纪要 |
+| PUT | /api/notes/:id | 更新纪要 |
+| DELETE | /api/notes/:id | 删除纪要 |
+| GET | /api/notes/:id/items | 获取纪要条目 |
+| POST | /api/notes/:id/items | 添加条目 |
+| PATCH | /api/items/:id | 更新条目 |
+| DELETE | /api/items/:id | 删除条目 |

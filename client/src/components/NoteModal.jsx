@@ -22,7 +22,7 @@ function NoteModal({ note, onSave, onClose }) {
     setItems(res.data);
   };
 
-  const handleSave = async () => {
+const handleSave = async () => {
     if (!title.trim()) {
       alert('请输入标题');
       return;
@@ -30,6 +30,14 @@ function NoteModal({ note, onSave, onClose }) {
 
     if (note?.id) {
       await axios.put(`${API_BASE}/notes/${note.id}`, { title });
+      // 保存新添加的 items（临时id的条目）
+      for (const item of items) {
+        if (!item.id || item.id > 1000000000) {
+          await axios.post(`${API_BASE}/notes/${note.id}/items`, {
+            content: item.content,
+          });
+        }
+      }
       onSave();
     } else {
       const res = await axios.post(`${API_BASE}/notes`, { title });
