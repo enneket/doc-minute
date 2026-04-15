@@ -14,11 +14,16 @@
 ### Docker 部署
 
 ```bash
+# 构建镜像
 docker build -t doc-minute .
+
+# 运行容器
 docker run -d --name doc-minute -p 5567:5567 doc-minute
 ```
 
 访问 http://localhost:5567
+
+**端口说明**: 容器内部端口 5567，映射到主机 5567
 
 ### 本地开发
 
