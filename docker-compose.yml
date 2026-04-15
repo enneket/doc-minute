@@ -4,8 +4,5 @@ services:
     ports:
       - "5567:5567"
     volumes:
-      - doc-minute-data:/app/server
+      - ./server:/app/server
     restart: unless-stopped
-
-volumes:
-  doc-minute-data:
