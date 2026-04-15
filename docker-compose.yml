@@ -4,5 +4,5 @@ services:
     ports:
       - "5567:5567"
     volumes:
-      - ./server/notes.db:/app/server/notes.db
+      - ./db:/app/db
     restart: unless-stopped

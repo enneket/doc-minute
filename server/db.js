@@ -2,7 +2,7 @@ const initSqlJs = require('sql.js');
 const path = require('path');
 const fs = require('fs');
 
-const dbPath = path.join(__dirname, 'notes.db');
+const dbPath = path.join(__dirname, '..', 'db', 'notes.db');
 let db;
 
 // 初始化数据库
