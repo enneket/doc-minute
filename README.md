@@ -14,17 +14,21 @@
 ### Docker 部署
 
 ```bash
+# 克隆项目
+git clone https://github.com/enneket/doc-minute.git
+cd doc-minute
+
 # 使用 docker-compose (推荐)
 docker compose up -d
 
 # 或手动构建运行
 docker build -t doc-minute .
-docker run -d --name doc-minute -p 5567:5567 -v doc-minute-data:/app/server doc-minute
+docker run -d --name doc-minute -p 5567:5567 -v $(pwd)/server:/app/server doc-minute
 ```
 
 访问 http://localhost:5567
 
-**数据持久化**: 使用 Docker volume `doc-minute-data` 存储 SQLite 数据库，删除容器后数据不丢失。
+**数据持久化**: 通过 bind mount 将本地 `server` 目录映射到容器，数据库文件保存在本地。
 
 **端口说明**: 容器内部端口 5567，映射到主机 5567
 
