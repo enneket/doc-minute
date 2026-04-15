@@ -2,6 +2,9 @@ FROM node:20-alpine
 
 WORKDIR /app
 
+# 更新 apk 索引并安装 Python 用于 better-sqlite3 编译
+RUN apk update && apk add --no-cache python3 make g++
+
 # 复制所有源代码
 COPY . .
 

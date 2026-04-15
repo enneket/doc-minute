@@ -3,6 +3,7 @@ const cors = require('cors');
 const path = require('path');
 const notesRouter = require('./routes/notes');
 const itemsRouter = require('./routes/items');
+const { initDb } = require('./db');
 
 const app = express();
 const PORT = process.env.PORT || 5567;
@@ -23,6 +24,11 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../client/dist/index.html'));
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
+async function start() {
+  await initDb();
+  app.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`);
+  });
+}
+
+start();

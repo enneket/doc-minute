@@ -6,8 +6,9 @@
     "test": "node db.test.js"
   },
   "dependencies": {
-    "better-sqlite3": "^9.4.3",
+    "better-sqlite3": "^9.6.0",
     "cors": "^2.8.5",
-    "express": "^4.18.2"
+    "express": "^4.18.2",
+    "sql.js": "^1.14.1"
   }
 }

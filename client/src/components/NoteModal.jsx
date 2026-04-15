@@ -80,7 +80,7 @@ function NoteModal({ note, onSave, onClose }) {
     }
   };
 
-  const handleKeyPress = (e) => {
+  const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
       e.preventDefault();
       handleAddItem();
@@ -133,7 +133,7 @@ function NoteModal({ note, onSave, onClose }) {
               type="text"
               value={newItemContent}
               onChange={e => setNewItemContent(e.target.value)}
-              onKeyPress={handleKeyPress}
+              onKeyDown={handleKeyDown}
               placeholder="添加条目..."
               style={styles.addItemInput}
             />
