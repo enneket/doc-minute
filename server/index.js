@@ -3,6 +3,7 @@ const cors = require('cors');
 const path = require('path');
 const notesRouter = require('./routes/notes');
 const itemsRouter = require('./routes/items');
+const exportRouter = require('./routes/export');
 const { initDb } = require('./db');
 
 const app = express();
@@ -15,6 +16,7 @@ app.use(express.json());
 app.use('/api/notes', notesRouter);
 app.use('/api/notes', itemsRouter);
 app.use('/api/items', itemsRouter);
+app.use('/api/export', exportRouter);
 
 // 静态文件服务 (前端构建产物)
 app.use(express.static(path.join(__dirname, '../client/dist')));
