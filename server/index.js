@@ -16,7 +16,7 @@ app.use(express.json());
 app.use('/api/notes', notesRouter);
 app.use('/api/notes', itemsRouter);
 app.use('/api/items', itemsRouter);
-app.use('/api/export', exportRouter);
+app.use('/api/import', exportRouter);
 
 // 静态文件服务 (前端构建产物)
 app.use(express.static(path.join(__dirname, '../client/dist')));
