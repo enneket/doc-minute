@@ -92,7 +92,7 @@ const handleSave = async () => {
           setItems(items.filter(i => i.id !== item.id));
           setConfirm(null);
         } catch (err) {
-          setConfirm(null);
+          setConfirm({ title: '删除失败', message: '删除条目失败，请重试', type: 'info', onConfirm: () => setConfirm(null) });
         }
       },
       onCancel: () => setConfirm(null),
