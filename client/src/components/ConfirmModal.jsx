@@ -4,7 +4,7 @@ function ConfirmModal({ title, message, type = 'info', onConfirm, onCancel }) {
   const confirmColor = type === 'danger' ? '#ff4d4f' : '#1890ff';
 
   return (
-    <div style={styles.overlay} onClick={onCancel}>
+    <div style={styles.overlay} onClick={e => { e.stopPropagation(); onCancel(); }}>
       <div style={styles.modal} onClick={e => e.stopPropagation()}>
         <div style={styles.header}>
           <h2 style={styles.headerTitle}>{title}</h2>
