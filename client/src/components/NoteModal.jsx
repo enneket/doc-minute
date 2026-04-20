@@ -26,7 +26,7 @@ function NoteModal({ note, onSave, onClose }) {
 
 const handleSave = async () => {
     if (!title.trim()) {
-      setConfirm({ title: '提示', message: '请输入标题', type: 'info' });
+      setConfirm({ title: '提示', message: '请输入标题', type: 'info', onConfirm: () => setConfirm(null), onCancel: () => setConfirm(null) });
       return;
     }
 
@@ -73,7 +73,7 @@ const handleSave = async () => {
       });
       setItems(items.map(i => i.id === item.id ? res.data : i));
     } catch (err) {
-      setConfirm({ title: '更新失败', message: '更新条目失败，请重试', type: 'info' });
+      setConfirm({ title: '更新失败', message: '更新条目失败，请重试', type: 'info', onConfirm: () => setConfirm(null), onCancel: () => setConfirm(null) });
     }
   };
 
@@ -92,7 +92,7 @@ const handleSave = async () => {
           setItems(items.filter(i => i.id !== item.id));
           setConfirm(null);
         } catch (err) {
-          setConfirm({ title: '删除失败', message: '删除条目失败，请重试', type: 'info', onConfirm: () => setConfirm(null) });
+          setConfirm({ title: '删除失败', message: '删除条目失败，请重试', type: 'info', onConfirm: () => setConfirm(null), onCancel: () => setConfirm(null) });
         }
       },
       onCancel: () => setConfirm(null),
