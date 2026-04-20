@@ -78,6 +78,7 @@ module.exports = {
   // 执行insert/update/delete
   execute(sql, params = []) {
     db.run(sql, params);
+    saveDb();
     const lastId = db.exec("SELECT last_insert_rowid() as id");
     return {
       lastInsertRowid: lastId[0]?.values[0]?.[0] || 0,
