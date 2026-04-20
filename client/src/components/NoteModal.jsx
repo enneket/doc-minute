@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import ConfirmModal from './ConfirmModal';
 
 const API_BASE = '/api';
 
@@ -7,6 +8,7 @@ function NoteModal({ note, onSave, onClose }) {
   const [title, setTitle] = useState(note?.title || '');
   const [items, setItems] = useState([]);
   const [newItemContent, setNewItemContent] = useState('');
+  const [confirm, setConfirm] = useState(null);
 
   useEffect(() => {
     setTitle(note?.title || '');
@@ -24,7 +26,7 @@ function NoteModal({ note, onSave, onClose }) {
 
 const handleSave = async () => {
     if (!title.trim()) {
-      alert('请输入标题');
+      setConfirm({ title: '提示', message: '请输入标题', type: 'info' });
       return;
     }
 
@@ -71,7 +73,7 @@ const handleSave = async () => {
       });
       setItems(items.map(i => i.id === item.id ? res.data : i));
     } catch (err) {
-      alert('更新失败');
+      setConfirm({ title: '更新失败', message: '更新条目失败，请重试', type: 'info' });
     }
   };
 
@@ -80,12 +82,21 @@ const handleSave = async () => {
       setItems(items.filter(i => i.id !== item.id));
       return;
     }
-    try {
-      await axios.delete(`${API_BASE}/items/${item.id}`);
-      setItems(items.filter(i => i.id !== item.id));
-    } catch (err) {
-      alert('删除失败');
-    }
+    setConfirm({
+      title: '确认删除',
+      message: '删除后不可恢复，确定要删除吗？',
+      type: 'danger',
+      onConfirm: async () => {
+        try {
+          await axios.delete(`${API_BASE}/items/${item.id}`);
+          setItems(items.filter(i => i.id !== item.id));
+          setConfirm(null);
+        } catch (err) {
+          setConfirm(null);
+        }
+      },
+      onCancel: () => setConfirm(null),
+    });
   };
 
   const handleKeyDown = (e) => {
@@ -154,6 +165,15 @@ const handleSave = async () => {
           <button onClick={handleSave} style={styles.saveBtn}>保存</button>
         </div>
       </div>
+      {confirm && (
+        <ConfirmModal
+          title={confirm.title}
+          message={confirm.message}
+          type={confirm.type}
+          onConfirm={confirm.onConfirm}
+          onCancel={confirm.onCancel}
+        />
+      )}
     </div>
   );
 }
