@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import ConfirmModal from './ConfirmModal';
 
 const API_BASE = '/api';
 
 function NoteList({ notes, loading, error, onEditNote, onRefresh, onAddNote }) {
   const [itemsMap, setItemsMap] = useState({}); // { noteId: [items] }
+  const [confirm, setConfirm] = useState(null);
 
   const fetchItems = async (noteId) => {
     const res = await axios.get(`${API_BASE}/notes/${noteId}/items`);
@@ -27,32 +29,48 @@ function NoteList({ notes, loading, error, onEditNote, onRefresh, onAddNote }) {
         ),
       }));
     } catch (err) {
-      alert('更新失败');
+      setConfirm({ title: '更新失败', message: '更新条目失败，请重试', type: 'info', onConfirm: () => setConfirm(null), onCancel: () => setConfirm(null) });
     }
   };
 
   const handleDeleteItem = async (item) => {
-    if (!window.confirm('确定删除这条目？')) return;
-    try {
-      await axios.delete(`${API_BASE}/items/${item.id}`);
-      setItemsMap(prev => ({
-        ...prev,
-        [item.note_id]: prev[item.note_id].filter(i => i.id !== item.id),
-      }));
-    } catch (err) {
-      alert('删除失败');
-    }
+    setConfirm({
+      title: '确认删除',
+      message: '删除后不可恢复，确定要删除吗？',
+      type: 'danger',
+      onConfirm: async () => {
+        try {
+          await axios.delete(`${API_BASE}/items/${item.id}`);
+          setItemsMap(prev => ({
+            ...prev,
+            [item.note_id]: prev[item.note_id].filter(i => i.id !== item.id),
+          }));
+          setConfirm(null);
+        } catch (err) {
+          setConfirm({ title: '删除失败', message: '删除条目失败，请重试', type: 'info', onConfirm: () => setConfirm(null), onCancel: () => setConfirm(null) });
+        }
+      },
+      onCancel: () => setConfirm(null),
+    });
   };
 
   const handleDeleteNote = async (noteId, e) => {
     e.stopPropagation();
-    if (!window.confirm('确定删除这条纪要？')) return;
-    try {
-      await axios.delete(`${API_BASE}/notes/${noteId}`);
-      onRefresh();
-    } catch (err) {
-      alert('删除失败');
-    }
+    setConfirm({
+      title: '确认删除',
+      message: '删除后不可恢复，确定要删除吗？',
+      type: 'danger',
+      onConfirm: async () => {
+        try {
+          await axios.delete(`${API_BASE}/notes/${noteId}`);
+          onRefresh();
+          setConfirm(null);
+        } catch (err) {
+          setConfirm({ title: '删除失败', message: '删除纪要失败，请重试', type: 'info', onConfirm: () => setConfirm(null), onCancel: () => setConfirm(null) });
+        }
+      },
+      onCancel: () => setConfirm(null),
+    });
   };
 
   const formatDate = (dateStr) => {
@@ -134,6 +152,15 @@ function NoteList({ notes, loading, error, onEditNote, onRefresh, onAddNote }) {
           </div>
         ))}
       </div>
+      {confirm && (
+        <ConfirmModal
+          title={confirm.title}
+          message={confirm.message}
+          type={confirm.type}
+          onConfirm={confirm.onConfirm}
+          onCancel={confirm.onCancel}
+        />
+      )}
     </div>
   );
 }
