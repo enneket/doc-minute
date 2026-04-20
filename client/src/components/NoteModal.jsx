@@ -41,6 +41,7 @@ const handleSave = async () => {
         }
       }
       onSave();
+      onClose();
     } else {
       const res = await axios.post(`${API_BASE}/notes`, { title });
       const newNoteId = res.data.id;
@@ -50,6 +51,7 @@ const handleSave = async () => {
         });
       }
       onSave();
+      onClose();
     }
   };
 
