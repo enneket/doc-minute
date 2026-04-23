@@ -24,34 +24,36 @@ function NoteModal({ note, onSave, onClose }) {
     setItems(res.data);
   };
 
-const handleSave = async () => {
+  const handleSave = async () => {
     if (!title.trim()) {
       setConfirm({ title: '提示', message: '请输入标题', type: 'info', onConfirm: () => setConfirm(null), onCancel: () => setConfirm(null) });
       return;
     }
 
-    if (note?.id) {
-      await axios.put(`${API_BASE}/notes/${note.id}`, { title });
-      // 保存新添加的 items（临时id的条目）
-      for (const item of items) {
-        if (!item.id || item.id > 1000000000) {
-          await axios.post(`${API_BASE}/notes/${note.id}/items`, {
+    try {
+      if (note?.id) {
+        await axios.put(`${API_BASE}/notes/${note.id}`, { title });
+        // 保存新添加的 items（临时id的条目）
+        for (const item of items) {
+          if (!item.id || item.id > 1000000000) {
+            await axios.post(`${API_BASE}/notes/${note.id}/items`, {
+              content: item.content,
+            });
+          }
+        }
+      } else {
+        const res = await axios.post(`${API_BASE}/notes`, { title });
+        const newNoteId = res.data.id;
+        for (const item of items) {
+          await axios.post(`${API_BASE}/notes/${newNoteId}/items`, {
             content: item.content,
           });
         }
       }
       onSave();
       onClose();
-    } else {
-      const res = await axios.post(`${API_BASE}/notes`, { title });
-      const newNoteId = res.data.id;
-      for (const item of items) {
-        await axios.post(`${API_BASE}/notes/${newNoteId}/items`, {
-          content: item.content,
-        });
-      }
-      onSave();
-      onClose();
+    } catch (err) {
+      setConfirm({ title: '保存失败', message: '保存纪要失败，请重试', type: 'info', onConfirm: () => setConfirm(null), onCancel: () => setConfirm(null) });
     }
   };
 

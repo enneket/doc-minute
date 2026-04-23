@@ -22,7 +22,11 @@ router.post('/', (req, res) => {
   if (!title) {
     return res.status(400).json({ error: '标题不能为空' });
   }
-  const result = db.execute('INSERT INTO notes (title) VALUES (?)', [title]);
+  const now = new Date().toISOString();
+  const result = db.execute(
+    'INSERT INTO notes (title, created_at, updated_at) VALUES (?, ?, ?)',
+    [title, now, now]
+  );
   const note = db.queryOne('SELECT * FROM notes WHERE id = ?', [result.lastInsertRowid]);
   res.json(note);
 });
@@ -41,7 +45,8 @@ router.put('/:id', (req, res) => {
   if (!title) {
     return res.status(400).json({ error: '标题不能为空' });
   }
-  db.execute('UPDATE notes SET title = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?', [title, id]);
+  const now = new Date().toISOString();
+  db.execute('UPDATE notes SET title = ?, updated_at = ? WHERE id = ?', [title, now, id]);
   const note = db.queryOne('SELECT * FROM notes WHERE id = ?', [id]);
   res.json(note);
 });
