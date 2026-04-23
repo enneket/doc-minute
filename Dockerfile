@@ -15,8 +15,5 @@ RUN cd server && npm install
 # 暴露端口
 EXPOSE 5567
 
-# 创建数据目录并挂载卷
-VOLUME ["/app/server"]
-
 # 启动后端 (会服务前端静态文件)
 CMD ["sh", "-c", "cd server && node index.js"]
